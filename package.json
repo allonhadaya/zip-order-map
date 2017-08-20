@@ -12,11 +12,8 @@
     "auto-reload-brunch": "^2",
     "babel-brunch": "^6.1.1",
     "brunch": "^2",
-    "clean-css-brunch": "^2",
-    "json-brunch": "^1.5.4",
     "mappa-mundi": "0.0.2",
     "p5": "^0.5.11",
-    "rx-lite": "^4.0.8",
     "topojson-client": "^3.0.0",
     "uglify-js-brunch": "^2"
   }

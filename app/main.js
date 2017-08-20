@@ -1,5 +1,3 @@
-const coordinates = require('./coordinates');
-
 const p5 = require('p5');
 const Mappa = require('mappa-mundi');
 
@@ -23,12 +21,6 @@ new p5(p => {
   let queue = [];
   let colors;
 
-  coordinates.subscribe({
-    onNext: coordinate => queue.push(coordinate),
-    onComplete: () => allDone = true,
-    onError: err => console.log(err)
-  })
-
   const drawOne = () => {
     // we either read everything, or are waiting for more data
     if (!queue.length) {
@@ -44,13 +36,27 @@ new p5(p => {
   };
 
   p.setup = () => {
+
+    // initialize the sketch
     p.createCanvas(1200, 640);
     p.noStroke();
     colors = [p.color(255,140,0), p.color(255,213,0), p.color(153,255,0), p.color(0,255,221), p.color(0,200,255), p.color(0,115,255), p.color(72,0,255), p.color(255,0,221), p.color(255,0,111), p.color(255,0,9)]
+
+    // receive coordinates from the worker
+    var worker = new Worker("/coordinates.js");
+    worker.onmessage = ({ data }) => {
+      if (data === 'done') {
+        allDone = true;
+      } else {
+        queue.push(data);
+      }
+    };
+
   };
 
   p.draw = () => {
-    for (let j = 0; j < 5; j++) drawOne();
+    console.log("draw");
+    for (let j = 0; j < 20; j++) drawOne();
   };
 
 });
