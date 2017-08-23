@@ -1,3 +1,4 @@
+const projection = require('d3-geo').geoAlbersUsa();
 const centroid = require('@turf/centroid');
 const truncate = require('@turf/truncate');
 const topo = require('topojson-client');
@@ -9,16 +10,17 @@ const toCentroids = ({ properties, geometry }) => centroid(geometry, properties)
 
 const byZipCode = ({ properties: { zip: a } }, { properties: { zip: b } }) => a.localeCompare(b);
 
-const toTuple = ({ properties: { zip }, geometry: { coordinates: [long, lat] } }) => [zip, long, lat];
-
-const toLowerResolution = f => truncate(f, 4, 3, true);
+const toZipXY = ({ properties: { zip }, geometry: { coordinates } }) => {
+  var xy = projection(coordinates);
+  xy.unshift(zip);
+  return xy;
+};
 
 const orderedCentroids =
   features()
     .map(toCentroids)
     .sort(byZipCode)
-    .map(toLowerResolution)
-    .map(toTuple);
+    .map(toZipXY);
 
 
 module.exports = orderedCentroids;

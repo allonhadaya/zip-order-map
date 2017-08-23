@@ -19,7 +19,7 @@ function onProgress(e) {
 function onComplete(e) {
   const lastLine = this.responseText.substring(offset);
   postMessage(JSON.parse(lastLine));
-  postMessage('done');
+  postMessage('completed');
 }
 
 var request = new XMLHttpRequest();
