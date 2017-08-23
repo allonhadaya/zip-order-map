@@ -1,3 +1,5 @@
+// zip code projected coordinates in JSON Line format
+
 const projection = require('d3-geo').geoAlbersUsa();
 const centroid = require('@turf/centroid');
 const truncate = require('@turf/truncate');
@@ -20,7 +22,9 @@ const orderedCentroids =
   features()
     .map(toCentroids)
     .sort(byZipCode)
-    .map(toZipXY);
+    .map(toZipXY)
+    .map(JSON.stringify)
+    .join('\n');
 
 
 module.exports = orderedCentroids;

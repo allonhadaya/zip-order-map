@@ -1,9 +1,6 @@
 let offset = 0;
 
 function onProgress(e) {
-
-  console.log('emitting block', offset, e);
-
   while (true) {
     const end = this.responseText.indexOf("\n", offset);
     if (end === -1) break;
@@ -11,9 +8,6 @@ function onProgress(e) {
     postMessage(JSON.parse(line));
     offset = end + 1;
   }
-
-  console.log('emitted block', offset);
-
 }
 
 function onComplete(e) {

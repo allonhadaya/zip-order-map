@@ -1,14 +1,11 @@
-// zip code coordinates in JSON Line format
-const zips = () => require('./data').map(JSON.stringify).join('\n');
-
 module.exports = {
   files: {
-    javascripts: {joinTo: 'app.js'},
-    stylesheets: {joinTo: 'app.css'}
+    javascripts: {joinTo: 'app.js'}
   },
   hooks: {
     preCompile() {
-      require('fs').writeFileSync('app/assets/coordinates.jsonl', zips());
+      // generate the coordinates
+      require('fs').writeFileSync('app/assets/coordinates.jsonl', require('./data'));
       return Promise.resolve();
     }
   }
