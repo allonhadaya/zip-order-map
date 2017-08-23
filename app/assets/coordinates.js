@@ -14,6 +14,7 @@ function onComplete(e) {
   const lastLine = this.responseText.substring(offset);
   postMessage(JSON.parse(lastLine));
   postMessage('completed');
+  close();
 }
 
 var request = new XMLHttpRequest();
