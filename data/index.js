@@ -13,9 +13,8 @@ const toCentroids = ({ properties, geometry }) => centroid(geometry, properties)
 const byZipCode = ({ properties: { zip: a } }, { properties: { zip: b } }) => a.localeCompare(b);
 
 const toZipXY = ({ properties: { zip }, geometry: { coordinates } }) => {
-  var xy = projection(coordinates);
-  xy.unshift(zip);
-  return xy;
+  const [x, y] = projection(coordinates);
+  return [zip, x, y];
 };
 
 const orderedCentroids =
