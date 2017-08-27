@@ -1,6 +1,3 @@
-let completed = false;
-const queue = [];
-
 const colors = [
   'rgb(255,140,0)',
   'rgb(255,213,0)',
@@ -14,32 +11,76 @@ const colors = [
   'rgb(255,0,9)'
 ];
 
-const ctx = document.getElementById('map').getContext('2d');
+let dotsPerSecond = 50;
+const followPeriod = 5;
+const dotsToScaleFor = dotsPerSecond * followPeriod;
 
-// receive coordinates from the worker
-const worker = new Worker("/coordinates.js");
-worker.onmessage = ({ data }) => {
+// update draw speed when the mouse moves
+window.addEventListener("mousemove", ({ clientX }) => {
+  dotsPerSecond = Math.ceil(5000 * clientX / window.innerWidth);
+});
+
+// receive coordinates from a web worker
+let completed = false;
+const coordinates = [];
+(new Worker("/coordinates.js")).onmessage = ({ data }) => {
   if (data === 'completed') {
     completed = true;
   } else {
-    queue.push(data);
+    coordinates.push(data);
   }
 };
 
-const drawOne = () => {
-  // we either read everything, or are waiting for more data
-  if (!queue.length || completed) {
-    return;
-  }
-  const [zip, x, y] = queue.shift();
-  ctx.fillStyle = colors[+zip.toString()[0]];
-  ctx.fillRect(x, y, 2, 2);
+let state = {
+  timestamp: new Date(),
+  to: 0
 };
+
+const advance = previous => {
+
+  const next = {
+    timestamp: new Date(),
+    from: previous.to,
+    done: false
+  };
+
+  const timeElapsed = next.timestamp - previous.timestamp;
+  const dotsToRender = Math.ceil(timeElapsed * dotsPerSecond / 1000);
+
+  next.to = next.from + dotsToRender;
+  next.scaleUntil = next.from + dotsToScaleFor;
+
+  if (next.to > coordinates.length) {
+    if (completed) {
+      next.done = true;
+    } else {
+      console.log(`rendering ${next.to - coordinates.length} too few coordinates because they are not yet loaded`);
+    }
+    next.to = coordinates.length;
+  }
+
+  return next;
+};
+
+const ctx = document.getElementById('map').getContext('2d');
 
 const draw = () => {
-  console.log("draw");
-  for (let j = 0; j < 5; j++) drawOne();
-  if (!completed) window.requestAnimationFrame(draw);
+
+  state = advance(state);
+  let { done, from, to } = state;
+
+  while(from < to) {
+    const [zip, x, y] = coordinates[from];
+    ctx.fillStyle = colors[+zip.toString()[0]];
+    ctx.fillRect(x, y, 2, 2);
+    from++;
+  }
+
+  if (done) {
+    console.log("drawing all done");
+    return;
+  }
+  window.requestAnimationFrame(draw);
 };
 
 window.requestAnimationFrame(draw);
