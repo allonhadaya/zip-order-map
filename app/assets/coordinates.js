@@ -18,13 +18,19 @@ function postCoordinates(e) {
 
 function onComplete() {
 
-  // the last message is still not sent
-  const lastLine = this.responseText.substring(offset);
-  postMessage(JSON.parse(lastLine));
+  try {
 
-  // let the client know they have everything
-  postMessage('completed');
-  close();
+    // the last message is still not sent
+    const lastLine = this.responseText.substring(offset);
+    postMessage(JSON.parse(lastLine));
+
+  } finally {
+
+    // let the client know they have everything
+    postMessage('completed');
+    close();
+
+  }
 }
 
 function failSilently() {
