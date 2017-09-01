@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 // zip code projected coordinates in JSON Line format
 
 console.error('compiling zip code centroids from census bureau shapefiles...');

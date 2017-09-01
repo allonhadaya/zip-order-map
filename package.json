@@ -2,8 +2,8 @@
   "name": "zip-order-map",
   "private": true,
   "scripts": {
-    "fetch-data": "node ./data > ./app/assets/coordinates.jsonl",
-    "start": "brunch build --production && cd public && python -m SimpleHTTPServer"
+    "start": "brunch build --production && cd public && python -m SimpleHTTPServer",
+    "build-data": "./data.js > ./app/assets/coordinates.jsonl"
   },
   "dependencies": {},
   "devDependencies": {
