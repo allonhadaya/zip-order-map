@@ -2,16 +2,17 @@
   "name": "zip-order-map",
   "private": true,
   "scripts": {
+    "fetch-data": "node ./data > ./app/assets/coordinates.jsonl",
     "start": "brunch build --production && cd public && python -m SimpleHTTPServer"
   },
   "dependencies": {},
   "devDependencies": {
     "@turf/centroid": "^4.6.1",
-    "@turf/truncate": "^4.6.0",
+    "adm-zip": "^0.4.7",
     "babel-brunch": "^6.1.1",
     "brunch": "^2",
     "d3-geo": "^1.6.4",
-    "topojson-client": "^3.0.0",
+    "shapefile": "^0.6.5",
     "uglify-js-brunch": "^2"
   }
 }
