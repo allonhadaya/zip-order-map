@@ -6,8 +6,10 @@ A visualization that demonstrates the geographical distribution of zip codes.
 
 ```sh
 > npm install
+> npm run fetch-data
 > npm start
-> # go to http://127.0.0.1:3333/
+> # the website is statically served from public/
+> # go to http://127.0.0.1:8000/
 ```
 
 ## Some inspirations
