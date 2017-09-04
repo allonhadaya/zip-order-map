@@ -23,7 +23,7 @@ window.addEventListener("mousemove", ({ clientX }) => {
 // receive coordinates from a web worker
 let completed = false;
 const coordinates = [];
-(new Worker("/coordinates.js")).onmessage = ({ data }) => {
+(new Worker("coordinates.js")).onmessage = ({ data }) => {
   if (data === 'completed') {
     completed = true;
   } else {
