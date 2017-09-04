@@ -47,5 +47,5 @@ request.addEventListener("load", onComplete);
 request.addEventListener("error", failSilently);
 request.addEventListener("abort", failSilently);
 
-request.open("GET", "/coordinates.jsonl", true);
+request.open("GET", "coordinates.jsonl", true);
 request.send(null);
