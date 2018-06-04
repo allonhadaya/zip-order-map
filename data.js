@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 // zip code projected coordinates in JSON Line format
 
 console.error('compiling zip code centroids from census bureau shapefiles...');
@@ -13,77 +11,77 @@ const centroid = require('@turf/centroid');
 
 const merge = chunks => {
 
-  console.error('merging data set buffers...');
+	console.error('merging data set buffers...');
 
-  const totalLength = chunks.reduce((size, buffer) => size + buffer.length, 0);
-  const buffer = new Buffer(totalLength);
+	const totalLength = chunks.reduce((size, buffer) => size + buffer.length, 0);
+	const buffer = new Buffer(totalLength);
 
-  let position = 0;
-  for (let chunk of chunks) {
-    chunk.copy(buffer, position);
-    position += chunk.length;
-  }
-  return buffer;
+	let position = 0;
+	for (let chunk of chunks) {
+		chunk.copy(buffer, position);
+		position += chunk.length;
+	}
+	return buffer;
 };
 
 const unzip = buffer => {
 
-  console.error('unzipping...');
+	console.error('unzipping...');
 
-  const zip = new Zip(buffer);
+	const zip = new Zip(buffer);
 
-  let shp, dbf;
-  for (let entry of zip.getEntries()) {
-    switch (extname(entry.entryName)) {
-      case '.shp':
-        shp = entry.getData();
-        break;
-      case '.dbf':
-        dbf = entry.getData();
-        break;
-    }
-    if (shp && dbf) {
-      return { shp, dbf };
-    }
-  }
-  throw new Error('missing shp and/or dbf');
+	let shp, dbf;
+	for (let entry of zip.getEntries()) {
+		switch (extname(entry.entryName)) {
+			case '.shp':
+				shp = entry.getData();
+				break;
+			case '.dbf':
+				dbf = entry.getData();
+				break;
+		}
+		if (shp && dbf) {
+			return { shp, dbf };
+		}
+	}
+	throw new Error('missing shp and/or dbf');
 };
 
 // https://www.census.gov/geo/maps-data/data/cbf/cbf_zcta.html
 const zipCodeGeoJson = () => new Promise((resolve, reject) => {
 
-  console.error('downloading...')
+	console.error('downloading...')
 
-  https.get(
-    'https://www2.census.gov/geo/tiger/GENZ2016/shp/cb_2016_us_zcta510_500k.zip',
-    res => {
+	https.get(
+		'https://www2.census.gov/geo/tiger/GENZ2016/shp/cb_2016_us_zcta510_500k.zip',
+		res => {
 
-      if (res.statusCode !== 200) {
-        return reject(new Error('failed to get zip code shapefile dataset: ' + res.statusCode));
-      }
+			if (res.statusCode !== 200) {
+				return reject(new Error('failed to get zip code shapefile dataset: ' + res.statusCode));
+			}
 
-      const chunks = [];
+			const chunks = [];
 
-      res.on('data', c => { chunks.push(c); }).on('end', () => {
+			res.on('data', c => { chunks.push(c); }).on('end', () => {
 
-        const { shp, dbf } = unzip(merge(chunks));
-        resolve(shapefile.open(shp, dbf));
+				const { shp, dbf } = unzip(merge(chunks));
+				resolve(shapefile.open(shp, dbf));
 
-      });
-    });
+			});
+		});
 });
 
 const collectFeatures = source => {
 
-  console.error('collecting geojson features...');
+	console.error('collecting geojson features...');
 
-  const features = [];
+	const features = [];
 
-  return source.read().then(function repeat({ done, value }) {
-    if (done) return features;
-    features.push(value);
-    return source.read().then(repeat);
-  });
+	return source.read().then(function repeat({ done, value }) {
+		if (done) return features;
+		features.push(value);
+		return source.read().then(repeat);
+	});
 };
 
 const toCentroids = ({ properties, geometry }) => centroid(geometry, properties);
@@ -91,25 +89,25 @@ const toCentroids = ({ properties, geometry }) => centroid(geometry, properties)
 const byZipCode = ({ properties: { ZCTA5CE10: a } }, { properties: { ZCTA5CE10: b } }) => a.localeCompare(b);
 
 const toZipXY = ({ properties: { ZCTA5CE10 }, geometry: { coordinates } }) => {
-  const [x, y] = projection(coordinates) || [0, 0];
-  return [ZCTA5CE10, x, y];
+	const [x, y] = projection(coordinates) || [0, 0];
+	return [ZCTA5CE10, x, y];
 };
 
 const generateCoordinates = features => {
 
-  console.error('generating coordinates...');
+	console.error('generating coordinates...');
 
-  return features
-    .map(toCentroids)
-    .sort(byZipCode)
-    .map(toZipXY)
-    .map(JSON.stringify);
+	return features
+		.map(toCentroids)
+		.sort(byZipCode)
+		.map(toZipXY)
+		.map(JSON.stringify);
 };
 
 const out = lines => lines.forEach(line => console.log(line));
 
 zipCodeGeoJson()
-  .then(collectFeatures)
-  .then(generateCoordinates)
-  .then(out)
-  .then(() => console.error('done.'));
+	.then(collectFeatures)
+	.then(generateCoordinates)
+	.then(out)
+	.then(() => console.error('done.'));
