@@ -1,14 +1,2 @@
-# NPM packages folder.
 node_modules/
-
-# Brunch folder for temporary files.
-tmp/
-
-# Brunch output folder.
-public/
-
-# Bower stuff.
-bower_components/
-
-# precompiled data file
-app/assets/coordinates.jsonl
+www/coordinates.jsonl

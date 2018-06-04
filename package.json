@@ -2,20 +2,16 @@
   "name": "zip-order-map",
   "private": true,
   "scripts": {
-    "start": "cd public && python -m SimpleHTTPServer",
-    "deploy": "npm run build-data && npm run build-app && gh-pages -d public",
-    "build-app": "brunch build --production",
-    "build-data": "./data.js > ./app/assets/coordinates.jsonl"
+    "start": "cd www && python -m http.server",
+    "build": "node data.js > ./www/coordinates.jsonl",
+    "deploy": "npm build && gh-pages -d www"
   },
   "dependencies": {},
   "devDependencies": {
     "@turf/centroid": "^4.6.1",
     "adm-zip": "^0.4.7",
-    "babel-brunch": "^6.1.1",
-    "brunch": "^2",
     "d3-geo": "^1.6.4",
     "gh-pages": "^1.0.0",
-    "shapefile": "^0.6.5",
-    "uglify-js-brunch": "^2"
+    "shapefile": "^0.6.5"
   }
 }
