@@ -1,4 +1,4 @@
-const colors = [
+var colors = [
   'rgb(255,140,0)',
   'rgb(255,213,0)',
   'rgb(153,255,0)',
@@ -11,41 +11,41 @@ const colors = [
   'rgb(255,0,9)'
 ];
 
-let dotsPerSecond = 50;
-const followPeriod = 5;
-const dotsToScaleFor = dotsPerSecond * followPeriod;
+var dotsPerSecond = 50;
+var followPeriod = 5;
+var dotsToScaleFor = dotsPerSecond * followPeriod;
 
 // update draw speed when the mouse moves
-window.addEventListener("mousemove", ({ clientX }) => {
-  dotsPerSecond = Math.ceil(5000 * clientX / window.innerWidth);
+window.addEventListener("mousemove", function(ev) {
+  dotsPerSecond = Math.ceil(5000 * ev.clientX / window.innerWidth);
 });
 
 // receive coordinates from a web worker
-let completed = false;
-const coordinates = [];
-(new Worker("coordinates.js")).onmessage = ({ data }) => {
-  if (data === 'completed') {
+var completed = false;
+var coordinates = [];
+(new Worker("coordinates.js")).onmessage = function(msg) {
+  if (msg.data === 'completed') {
     completed = true;
   } else {
-    coordinates.push(data);
+    coordinates.push(msg.data);
   }
 };
 
-let state = {
+var state = {
   timestamp: new Date(),
   to: 0
 };
 
-const advance = previous => {
+var advance = function(previous) {
 
-  const next = {
+  var next = {
     timestamp: new Date(),
     from: previous.to,
     done: false
   };
 
-  const timeElapsed = next.timestamp - previous.timestamp;
-  const dotsToRender = Math.ceil(timeElapsed * dotsPerSecond / 1000);
+  var timeElapsed = next.timestamp - previous.timestamp;
+  var dotsToRender = Math.ceil(timeElapsed * dotsPerSecond / 1000);
 
   next.to = next.from + dotsToRender;
   next.scaleUntil = next.from + dotsToScaleFor;
@@ -54,7 +54,7 @@ const advance = previous => {
     if (completed) {
       next.done = true;
     } else {
-      console.log(`rendering ${next.to - coordinates.length} too few coordinates because they are not yet loaded`);
+      console.log('rendering', next.to - coordinates.length, 'too few coordinates because they are not yet loaded');
     }
     next.to = coordinates.length;
   }
@@ -62,21 +62,25 @@ const advance = previous => {
   return next;
 };
 
-const ctx = document.getElementById('map').getContext('2d');
+var ctx = document.getElementById('map').getContext('2d');
 
-const draw = () => {
+var draw = function() {
 
   state = advance(state);
-  let { done, from, to } = state;
 
-  while(from < to) {
-    const [zip, x, y] = coordinates[from];
-    ctx.fillStyle = colors[+zip.toString()[0]];
+  var c, zip, firstDigit, x, y;
+
+  for (var i = state.from; i < state.to; i++) {
+    c = coordinates[i];
+    zip = c[0];
+    x = c[1];
+    y = c[2];
+    firstDigit = +zip.toString()[0];
+    ctx.fillStyle = colors[firstDigit];
     ctx.fillRect(x, y, 2, 2);
-    from++;
   }
 
-  if (done) {
+  if (state.done) {
     console.log("drawing all done");
     return;
   }
