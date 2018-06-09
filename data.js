@@ -6,8 +6,7 @@ const https = require('https');
 const Zip = require('adm-zip');
 const { extname } = require('path');
 const shapefile = require('shapefile');
-const projection = require('d3-geo').geoAlbersUsa();
-const centroid = require('@turf/centroid');
+const { default: centroid } = require('@turf/centroid');
 
 const merge = chunks => {
 
@@ -84,13 +83,14 @@ const collectFeatures = source => {
 	});
 };
 
-const toCentroids = ({ properties, geometry }) => centroid(geometry, properties);
+const toCentroids = ({ properties, geometry }) => centroid(geometry, { properties });
 
 const byZipCode = ({ properties: { ZCTA5CE10: a } }, { properties: { ZCTA5CE10: b } }) => a.localeCompare(b);
 
-const toZipXY = ({ properties: { ZCTA5CE10 }, geometry: { coordinates } }) => {
-	const [x, y] = projection(coordinates) || [0, 0];
-	return [ZCTA5CE10, x, y];
+const toZipLatLon = ({ properties: { ZCTA5CE10 }, geometry: { coordinates: [lat, lon] } }) => {
+	// see https://gis.stackexchange.com/questions/8650/measuring-accuracy-of-latitude-and-longitude
+	// "The third decimal place is worth up to 110 m: it can identify a large agricultural field or institutional campus."
+	return `["${ZCTA5CE10}",${lat.toFixed(3)},${lon.toFixed(3)}]`;
 };
 
 const generateCoordinates = features => {
@@ -100,8 +100,7 @@ const generateCoordinates = features => {
 	return features
 		.map(toCentroids)
 		.sort(byZipCode)
-		.map(toZipXY)
-		.map(JSON.stringify);
+		.map(toZipLatLon);
 };
 
 const out = lines => lines.forEach(line => console.log(line));

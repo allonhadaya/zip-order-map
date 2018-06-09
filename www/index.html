@@ -7,10 +7,15 @@
         padding: 0;
         margin: 0;
     }
+    canvas {
+        width: 100%;
+    }
 </style>
-<canvas id="map" width="960" height="500"></canvas>
+<script src="d3-geo.min.js"></script>
+<script src="d3-composite-projections.min.js"></script>
+<canvas id="map"></canvas>
 <script>
-(function () {
+(function (projection) {
     'use strict';
 
     var colors = [
@@ -26,9 +31,14 @@
         'rgb(255,0,9)'
     ];
 
-    var dotsPerSecond = 50;
+    var dotsPerSecond = 2500;
     var followPeriod = 5;
     var dotsToScaleFor = dotsPerSecond * followPeriod;
+    var canvas = document.getElementById("map");
+    var ctx = canvas.getContext('2d');
+    projection
+        .scale(canvas.width)
+        .translate([canvas.width / 2, canvas.height / 2]);
 
     // update draw speed when the mouse moves
     window.addEventListener("mousemove", function(ev) {
@@ -50,7 +60,6 @@
         timestamp: new Date(),
         to: 0
     };
-
     var advance = function(previous) {
 
         var next = {
@@ -77,22 +86,24 @@
         return next;
     };
 
-    var ctx = document.getElementById('map').getContext('2d');
-
     var draw = function() {
 
         state = advance(state);
 
-        var c, zip, firstDigit, x, y;
+        if (state.from === 0) {
+            // completely redraw the canvas when from is set to zero
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        var c, zip, firstDigit, xy;
 
         for (var i = state.from; i < state.to; i++) {
             c = coordinates[i];
             zip = c[0];
-            x = c[1];
-            y = c[2];
+            xy = projection([c[1], c[2]]);
             firstDigit = +zip.toString()[0];
             ctx.fillStyle = colors[firstDigit];
-            ctx.fillRect(x, y, 2, 2);
+            ctx.fillRect(Math.trunc(xy[0]), Math.trunc(xy[1]), 1, 1);
         }
 
         if (state.done) {
@@ -103,5 +114,5 @@
     };
 
     window.requestAnimationFrame(draw);
-}());
+}(d3.geoAlbersUsaTerritories()));
 </script>

@@ -6,12 +6,12 @@
     "build": "node data.js > ./www/coordinates.jsonl",
     "deploy": "npm build && gh-pages -d www"
   },
-  "dependencies": {},
-  "devDependencies": {
-    "@turf/centroid": "^4.6.1",
-    "adm-zip": "^0.4.7",
-    "d3-geo": "^1.6.4",
-    "gh-pages": "^1.0.0",
-    "shapefile": "^0.6.5"
-  }
+  "dependencies": {
+    "@turf/centroid": "^6.0.2",
+    "adm-zip": "^0.4.11",
+    "d3-composite-projections": "^1.2.0",
+    "d3-geo": "^1.10.0",
+    "shapefile": "^0.6.6"
+  },
+  "devDependencies": {}
 }
